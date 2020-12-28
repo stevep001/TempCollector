@@ -5,11 +5,12 @@ import uuid
 import bme280
 import configparser
 
-def publish_event(temperature, humidity, pressure):
+def publish_event(humidity, pressure, temperature):
 	config = configparser.ConfigParser()
 	config.read('config.ini')
 	credentials = TopicCredentials(config['DEFAULT']['TopicCredentials'])
 	endpoint = config['DEFAULT']['Endpoint']
+	print "Endpoint: ", endpoint
 
 	client = EventGridClient(credentials)
 	payload = [{
@@ -21,7 +22,7 @@ def publish_event(temperature, humidity, pressure):
 				'pressure' : pressure
 			},
 			'event_type' : 'Sample',
-			'event_time' : datetime.datetime.now(),
+			'event_time' : datetime.now(),
 			'data_version' : 1
 		}]
 	
@@ -32,6 +33,12 @@ def publish_event(temperature, humidity, pressure):
 
 def main():
 	print("Starting")
+	temperature, pressure, humidity = bme280.readBME280All()
+	print "Temperature: ", temperature
+	print "Humidity: ", humidity
+	print "Pressure: ", pressure
+	publish_event(humidity, pressure, temperature)
+	print("All done.")
 
 if __name__ == "__main__":
 	main()
