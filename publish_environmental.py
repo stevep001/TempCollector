@@ -3,9 +3,14 @@ from azure.eventgrid import EventGridClient
 from msrest.authentication import TopicCredentials
 import uuid
 import bme280
+import configparser
 
-def publish_event(self, temperature, humidity, pressure):
-	credentials = TopicCredentials(self.settings.EVENT_GRID_KEY)
+def publish_event(temperature, humidity, pressure):
+	config = configparser.ConfigParser()
+	config.read('config.ini')
+	credentials = TopicCredentials(config['DEFAULT']['TopicCredentials'])
+	endpoint = config['DEFAULT']['Endpoint']
+
 	client = EventGridClient(credentials)
 	payload = [{
 			'id' : str(uuid.uuid4()),
@@ -21,6 +26,12 @@ def publish_event(self, temperature, humidity, pressure):
 		}]
 	
 	client.publish_events(
-		"endpoint",
+		endpoint,
 		events = payload
 	)
+
+def main():
+	print("Starting")
+
+if __name__ == "__main__":
+	main()
